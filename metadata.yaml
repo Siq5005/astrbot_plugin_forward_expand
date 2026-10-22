@@ -1,0 +1,26 @@
+name: astrbot_plugin_forward_expand
+display_name: 合并转发展开
+desc: |-
+  把用户直接发来的合并转发消息展开成文本，注入给模型。
+
+  AstrBot 的转发展开能力只接在「引用」路径上——用户引用一条转发时才会去调
+  `get_forward_msg` 取内容；而单独发来的转发在渲染时只得到一个 `[转发消息]`
+  占位符，模型完全看不到里面的聊天记录。
+
+  更麻烦的是：转发消息的 `event.message_str` 是空的，而框架在
+  「文本为空且无图片/文件/语音/视频/引用」时会**直接跳过 LLM 请求**，所以纯转发
+  消息连一句"看不到"都不会回。
+
+  本插件以高优先级消息处理器运行，调用 OneBot 的 `get_forward_msg` 把内容摊平成
+  「昵称: 内容」写回 `event.message_str`，既让转发内容可被阅读、总结和追问，也让
+  这类消息重新进入正常的回复流程。
+
+  转发里的图片会被追加到消息链，由框架下载后作为真实图片送进模型——否则模型只
+  看到 `[图片]` 占位符，知道自己收到了图却不知道画的是什么。
+short_desc: 让模型能读到合并转发的聊天记录，而不是只看到 [转发消息]。
+version: "1.1.0"
+author: Coe
+repo: https://github.com/Siq5005/astrbot_plugin_forward_expand
+support_platforms:
+  - aiocqhttp
+astrbot_version: ">=4.16,<5"
